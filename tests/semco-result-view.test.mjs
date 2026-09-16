@@ -89,16 +89,46 @@ test('곡선: 격자 0.5~4 · 0.1 · 36점 · 현재 OP의 점 = 히어로 · �
   assert.equal(snapOp(0.01), 0.5);
 });
 
-test('엣지: 영업이익 0 → OPI 0 · TAI만 · 비연봉제(월급)는 월급 × 12 기준 · 근무 0개월 → 0', () => {
+test('엣지: 영업이익 0 → OPI 0 · TAI만 · 비연봉제(월급)는 **월급** 기준 · 근무 0개월 → 0', () => {
   const zero = view({ ...SEMCO_DEFAULTS, opTril: 0 });
   assert.equal(zero.hero.opi, 0);
   assert.ok(zero.hero.tai > 0);
   const m = view({ ...SEMCO_DEFAULTS, grade: 'monthly', salary: 400 });
   assert.equal(m.condition.isMonthly, true);
-  assert.equal(m.formula.opi.base, 4800);
+  // 2026-09-16까지 이 줄은 4800(= 월급 × 12)을 기대해 **12배 오류를 고정하고 있었다**(외부 리뷰 D-1).
+  // 월급제 지급률은 이미 월급 배수라 기준금액은 월급 그대로여야 한다.
+  assert.equal(m.formula.opi.base, 400);
   assert.equal(m.formula.tai.base, 380);
   const none = view({ ...SEMCO_DEFAULTS, months: 0 });
   assert.equal(none.hero.total, 0);
+});
+
+// 2026-09-16 외부 리뷰 D-1 회귀 — 이 저장소의 계산 사고는 전부 **단위**에서 났다(§2).
+// 구현을 다시 적어 고정하지 않고, ① 산식의 기준금액이 입력과 같은 단위인가 ② 코드가 채택한
+// 상한(월급 700%)이 실제 금액으로 지켜지는가 두 가지를 독립적으로 잰다.
+test('단위: 월급제 OPI는 월급 배수다 — 기준금액 = 월급 · 상한 700% = 월급 × 7', () => {
+  const monthly = { ...SEMCO_DEFAULTS, grade: 'monthly', salary: 400, months: 12 };
+
+  // ① 산식의 기준금액은 입력한 월급 그대로 — 화면 문장과 계산이 같은 수를 말한다
+  const v = view(monthly);
+  assert.equal(v.formula.opi.base, monthly.salary);
+  assert.equal(v.formula.opi.baseLabel, '월급');
+  const pre = v.formula.opi.base * v.formula.opi.rateCap * v.formula.opi.gradeMul * (v.formula.opi.months / 12);
+  assert.equal(Math.round(pre), v.formula.opi.pre);
+
+  // ② 상한 — 영업이익이 아무리 커도 월급의 700%를 넘지 않는다(월급 400 → 2,800만)
+  const capped = calcSemco({ ...monthly, opTril: 100, h1: 50, h2: 50 });
+  assert.equal(Math.round(capped.opiRateCap * 1e4) / 1e4, 7);
+  assert.equal(Math.round(capped.psMan), monthly.salary * 7);
+
+  // ③ 기본 영업이익(1.64조)에서의 실제 금액 — 지급률 273.33%는 월급에 붙는다
+  const base = calcSemco({ ...monthly, h1: 50, h2: 50 });
+  assert.equal(Math.round(base.psMan), Math.round(monthly.salary * base.opiRateCap));
+
+  // ④ 연봉제는 계약연봉 기준 그대로(상한 50%) — 월급제 수정이 연봉제를 건드리지 않았다
+  const annual = calcSemco({ ...SEMCO_DEFAULTS, h1: 50, h2: 50 });
+  assert.ok(annual.opiRateCap <= 0.5);
+  assert.equal(Math.round(annual.psMan), Math.round(SEMCO_DEFAULTS.salary * annual.opiRateCap));
 });
 
 // ── 세전 보기 ─────────────────────────────────────────────────────────────

@@ -263,7 +263,12 @@ export function calcSemco(p) {
   const opiRateRaw = avg > 0 ? opiAvg / avg : 0;
   const isMonthly = p.grade === 'monthly';
   const opiRateCap = isMonthly ? Math.min(opiRateRaw * 14, 7) : Math.min(opiRateRaw, 0.5);
-  const opiBase = isMonthly ? sal * 12 : sal;
+  // 지급 기준금액은 **p.salary 그대로**다 — 월급제면 월급, 연봉제면 계약연봉.
+  // 월급제 지급률(opiRateCap)이 이미 `opiRateRaw * 14`로 **월급 배수**(최대 700%)로 환산된 값이라,
+  // 여기에 다시 ×12를 하면 12배가 된다(2026-09-16 외부 리뷰 D-1 · 월급 400 기준 1,093만 → 13,120만).
+  // 같은 파일의 삼성 본체가 정본이다: `(isMonthly ? salary : annualSalary) * opiRateCap`(:354).
+  // 연봉 기준 지급률이 필요한 곳은 아래 rateBase(월급 × 12)이고 그건 세율·표시용이다.
+  const opiBase = sal;
   const gradeMul = isMonthly ? 1 : getGradeMul(p.grade);
   const opiMan = opiBase * opiRateCap * wr * gradeMul;
   const taiBase = isMonthly ? Math.max(0, sal - 20) : sal / 20;

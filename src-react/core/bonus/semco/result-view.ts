@@ -113,7 +113,9 @@ export function buildSemcoResultView({ inputs, results }: { inputs: SemcoInputs;
     pool: { opT, rate: SAMSUNG_RULES.opiPoolRate, poolT: results.psPoolT },
     perHead: { headcount: Number(inputs.headcount) || 0, avgMan: round(results.psAvgMan) },
     opi: {
-      base: isMonthly ? salary * 12 : salary, baseLabel: isMonthly ? '월급 × 12' : '계약연봉',
+      // 화면 산식은 계산과 같은 기준금액을 말해야 한다 — 월급제는 **월급**이다(2026-09-16 리뷰 D-1).
+      // 종전 '월급 × 12'는 12배 계산과 짝이 맞는 라벨이었고, 둘 다 틀렸다.
+      base: salary, baseLabel: isMonthly ? '월급' : '계약연봉',
       rateRaw: results.opiRateRaw, rateCap: results.opiRateCap,
       capped: results.opiRateCap < (isMonthly ? results.opiRateRaw * 14 : results.opiRateRaw) - 1e-9,
       gradeMul: results.gradeMul, months, pre: round(results.psMan), post: hero.opi,
