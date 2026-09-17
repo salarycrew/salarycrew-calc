@@ -12,20 +12,20 @@ import { buildHynixResultView } from '../src-react/core/bonus/hynix/result-view.
 // **기본값 골든**이다 — 인자 없이 부르므로 '지금 기본값이 무엇을 내는가'를 적어 두는 것이 이 테스트의 일이다.
 // 그래서 운영값(CMS)이 바뀌면 **기대값을 옮긴다**(입력 고정이 아니다 — `0f6b454f`의 분류).
 // 2026-09-11: 메모리 2026년 영업이익이 CMS에서 300 → 350조가 되며 삼성 9,558 → 10,728 · 2.28 → 2.03배.
-// 2026-09-15: 수정 잠정합의안(2026-09-10)이 **이연을 없앴다** — 당해 지급이 psMan의 80% → 100%가 되며
-// 하이닉스 21,779 → 26,685. 현금 50 · 주식 50이고 세전 당해는 44,367(= psMan + piMan)이다.
-test('골든: 기본값(5,600만 · 2026 · 삼성 메모리 350 / 하이닉스 256) — 삼성 10,728 · 하이닉스 26,685 · 2.49배', () => {
+// 2026-09-17: 임단협 가결(9/16)로 **재원이 단순 10%(애드백)로 돌아가고 이연 20%가 복원**됐다 —
+// 하이닉스 26,685 → 23,740. 재원은 커졌지만(43,807 → 48,188) 당해 지급이 80%로 줄어 순효과는 감소다.
+test('골든: 기본값(5,600만 · 2026 · 삼성 메모리 350 / 하이닉스 256) — 삼성 10,728 · 하이닉스 23,740 · 2.21배', () => {
   const v = buildCompareTwoView();
   assert.equal(v.salary, 5600);
   assert.equal(v.samsung.received, 10728);         // samsung-result-view 골든 cashableNow
-  assert.equal(v.hynix.received, 26685);           // hynix-result-view 골든 hero.total
+  assert.equal(v.hynix.received, 23740);           // hynix-result-view 골든 hero.total
   assert.equal(v.winner, 'hynix');
-  assert.equal(v.ratio, 2.49);
+  assert.equal(v.ratio, 2.21);
   assert.equal(v.samsung.opT, 348);   // 메모리 350 + 파운드리 −1.5 + S.LSI −0.5
   assert.equal(v.hynix.opT, 256);
   assert.equal(v.samsung.headcount, 77400);
   assert.equal(v.hynix.headcount, 35000);
-  assert.equal(v.perHeadRatio, 1.48);   // 메모리 350조 반영(2026-09-11)
+  assert.equal(v.perHeadRatio, 1.46);   // 메모리 350조(2026-09-11) + 하이닉스 이연 복원(2026-09-17)
   assert.equal(v.sameOp.dsOpT, 256);
   assert.equal(v.sameOp.samsungReceived, 8584);
 });

@@ -27,7 +27,7 @@ export interface CompareSide {
   pi: number | null;            // 하이닉스만 — PI 현금
   vestedNow: number;            // 올해 풀리는 자사주(세후 평가)
   received: number;             // 올해 손에 들어오는 돈 = cash + (pi ?? 0) + vestedNow
-  later: number;                // 나중에 풀리는 몫 — 삼성 2·3년차 주식 · 하이닉스 이연 20%(올해 실효세율로 근사)
+  later: number;                // 나중에 풀리는 몫 — 삼성 2·3년차 주식 · 하이닉스 이연 20% 주식(올해 실효세율로 근사)
   shape: PayoutShape;
 }
 
@@ -78,7 +78,7 @@ export function buildCompareTwoView({ salary = null, samCms = null, hxCms = null
     key: 'samsung', label: '삼성전자', sub: '메모리',
     opT: sv.formula.premise.dsOpT,
     opNote: `DS 합계 — 메모리 ${ops.mem} + 파운드리 ${ops.fnd} + 시스템LSI ${ops.lsi}`,
-    poolLabel: '재원 × 10% (공시가 차감 후 값)',
+    poolLabel: '영업이익 × 10%',
     headcount: sHead,
     perHeadOp: sHead > 0 ? round(sv.formula.premise.dsOpT * 1e8 / sHead) : 0,
     rate: sal > 0 ? sGrossPre / sal : 0,
@@ -95,8 +95,8 @@ export function buildCompareTwoView({ salary = null, samCms = null, hxCms = null
   const hynix: CompareSide = {
     key: 'hynix', label: 'SK하이닉스', sub: null,
     opT: hv.condition.opT,
-    opNote: '전사 — 공시 영업이익(재원 차감 전)',
-    poolLabel: `OP × ${(hv.formula.pool.effRate * 100).toFixed(2)}% (= OP ÷ 11)`,
+    opNote: '전사 — 공시 영업이익',
+    poolLabel: `영업이익 × ${(hv.formula.pool.effRate * 100).toFixed(2).replace(/\.?0+$/, '')}%`,
     headcount: hHead,
     perHeadOp: hHead > 0 ? round((hv.condition.opT - hv.formula.pool.poolT) * 1e8 / hHead) : 0,
     rate: hRes.grossRate,

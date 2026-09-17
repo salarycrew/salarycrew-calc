@@ -60,7 +60,7 @@ export interface HynixThreeYear {
   opNext: number | null;  // 둘째 해부터의 영업이익(전부 같으면 그 값, 다르면 null) — 표 머리 문구용
 }
 export interface HynixFormula {
-  pool: { opT: number; effRate: number; poolT: number };                       // OP × 9.09% = 재원
+  pool: { opT: number; effRate: number; poolT: number };                       // OP × 10% = 재원
   perHead: { headcount: number; avgMan: number };                              // 재원 ÷ 인원
   ps: { salary: number; avgSalary: number; months: number; pre: number; rate: number };   // 1인 평균 × (내 연봉 ÷ 평균) × 근무
   pi: { base: number; h1: number; h2: number; pre: number };                   // 연봉 ÷ 20 × (상 + 하)
