@@ -1,10 +1,10 @@
-// semco-result-view.test.mjs — 삼성전기 결과 화면 뷰 모델의 골든값 + 항등식.
+// semco-result-view.test.mjs — OPI+TAI 결과 화면 뷰 모델의 골든값 + 항등식 (삼성전기 · 삼성SDI).
 //
 // 값 하나가 맞는 테스트 + **값끼리의 관계**가 맞는 테스트(설계 2026-09-07 §4). 골든값은 계산기가 정본이다 —
 // calc-bridge 골든([4b] OPI 재원 = 영업이익 10% · TAI = 연봉/20 × 상하반기%)과 같은 뿌리.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { SEMCO_DEFAULTS, calcSemcoResult, getActiveSemcoYears } from '../src-react/core/bonus/semco/derive.ts';
+import { SDI, SDI_DEFAULTS, SEMCO, SEMCO_DEFAULTS, calcSemcoResult, getActiveSemcoYears, opiTaiDefaults } from '../src-react/core/bonus/semco/derive.ts';
 import { buildSemcoResultView, heroTotal, heroParts } from '../src-react/core/bonus/semco/result-view.ts';
 import { sampleHeroCurve, heroAtOp, snapOp, CURVE_DEFAULT } from '../src-react/core/bonus/semco/curve.ts';
 import { calcSemco } from '../src-react/core/calc-bridge.js';
@@ -151,4 +151,43 @@ test('세전: OPI + TAI = 합계 · 세전 > 세후 · 곡선과 히어로가 �
   }
   const at = heroAtOp(inputs, Number(v.condition.opT));
   assert.equal(at.totalPre, v.hero.pre.total);
+});
+
+
+// ── 삼성SDI — 같은 엔진, 다른 값 (2026-09-18) ────────────────────────────────
+// 여기서 재는 것은 계산이 아니라 **회사 스펙이 실제로 화면 값까지 닿는가**다.
+// semco 값이 그대로 새면(평균연봉 7,000만·TAI 75/75) 지급률이 통째로 달라지므로 골든으로 못 박는다.
+
+test('삼성SDI 골든: 전사 영업이익 0.39조 · 평균 9,498만 · 12,826명 · TAI 75/0', () => {
+  const v = view(SDI_DEFAULTS);
+  assert.equal(v.condition.opT, 0.39);
+  assert.equal(v.condition.avgSalary, 9498);      // DART 2025 귀속(data/companies.json)
+  assert.equal(v.condition.headcount, 12826);
+  assert.equal(v.condition.h1, 75);               // 2026 상반기 전 사업부 75% 확정
+  assert.equal(v.condition.h2, 0);                // 하반기 미발표 — 없는 값을 채우지 않는다(§2)
+  assert.equal(v.formula.pool.poolT.toFixed(3), '0.039');   // 0.39 × 10%
+  assert.equal(v.formula.perHead.avgMan, 304);
+  assert.equal(v.formula.opi.capped, false);      // 지급률 3.2% — 상한 50%와 멀다
+  assert.equal(v.formula.opi.pre, 179);
+  assert.equal(v.formula.tai.pre, 210);           // 280 × (75% + 0%)
+  assert.equal(v.hero.total, 328);
+  assert.equal(v.formula.deduct.net, 309);
+});
+
+test('삼성SDI: 2027년 이후는 컨센서스가 없어 2026E와 같은 값이다 — 회복 곡선을 지어내지 않는다', () => {
+  const v = view(SDI_DEFAULTS);
+  assert.equal(v.threeYear.opNext, 0.39);
+  for (const r of v.threeYear.rows) assert.equal(r.opT, 0.39);
+});
+
+test('회사 스펙이 두 벌로 새지 않는다 — 기본값은 companies.ts 하나에서만 나온다', () => {
+  assert.deepEqual(opiTaiDefaults(SEMCO), SEMCO_DEFAULTS);
+  assert.deepEqual(opiTaiDefaults(SDI), SDI_DEFAULTS);
+  // 두 회사가 같은 값을 쓰면 스펙을 나눈 의미가 없다(복붙 회귀 감지)
+  assert.notEqual(SDI_DEFAULTS.avgSalary, SEMCO_DEFAULTS.avgSalary);
+  assert.notEqual(SDI_DEFAULTS.opTril, SEMCO_DEFAULTS.opTril);
+  assert.equal(SDI.reportSlug, 'samsung-sdi');
+  // 조건 바 눈금은 회사 영업이익 규모를 따라간다 — semco 눈금(1~3조)이 SDI에 새면 바가 못 쓰게 된다
+  assert.ok(Math.max(...SDI.scenarioOps) < Math.max(...SEMCO.scenarioOps));
+  assert.ok(SDI.scenarioOps.includes(0));
 });

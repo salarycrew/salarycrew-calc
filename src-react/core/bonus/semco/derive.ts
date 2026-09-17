@@ -1,4 +1,8 @@
-// core/bonus/semco/derive.ts — 삼성전기 계산 입력 파생·상수 (React-free).
+// core/bonus/semco/derive.ts — OPI+TAI 엔진의 입력 파생·상수 (React-free).
+//
+// 2026-09-18: 같은 산식을 쓰는 회사가 둘이 됐다(삼성전기·삼성SDI). 회사별로 다른 값은 전부
+// companies.ts로 나갔고 여기는 **그 값으로 입력을 짓는 규칙**만 남는다 — SEMCO_* 이름은
+// 소비처(ai-worker·check-calc-drift·공개 저장소)가 물고 있어 그대로 둔다.
 //
 // 2026-09-07 S5b: core/semco-derive.js를 옮기고 경계에 타입을 붙였다. 파생값 무변경 — calc-bridge 골든([4b])이 같은 값을 낸다.
 // 옛 경로 core/semco-derive.js는 이 파일을 re-export하는 shim(gen-salary-pages·check-calc-drift가 그대로 돈다).
@@ -8,34 +12,41 @@
 // 이 파일이 모르는 것: 화면. 재배열·합산은 result-view.ts가.
 import { calcSemco } from '../../calc-bridge.js';
 import { HYNIX_YEARS, getActiveHynixYears, getHynixOp, getHynixWorkMonths, getHynixYearSalary, hynixOpKey } from '../hynix/derive.ts';
+import { SDI, SEMCO, type OpiTaiCompany } from './companies.ts';
 import type { SemcoInputs, SemcoResult } from './types.ts';
 
 export type { SemcoInputs, SemcoOpKey, SemcoResult, SemcoGrade } from './types.ts';
+export { OPI_TAI_COMPANIES, SDI, SEMCO } from './companies.ts';
+export type { OpiTaiCompany } from './companies.ts';
 
 export const SEMCO_YEARS: number[] = HYNIX_YEARS;
 
-/** 연도별 영업이익 기본 가정(조) — 2026 1.64 … 장기 가정 */
-export const SEMCO_OP_DEFAULTS: Record<number, number> = {
-  2026: 1.64, 2027: 1.85, 2028: 2.05, 2029: 2.15, 2030: 2.25,
-  2031: 2.35, 2032: 2.45, 2033: 2.55, 2034: 2.65, 2035: 2.75,
-};
+/** 그 회사의 첫 진입 입력 — 회사별로 다른 값은 companies.ts 하나에서만 온다 */
+export function opiTaiDefaults(co: OpiTaiCompany): SemcoInputs {
+  const opAt = (year: number) => co.opDefaults[year] ?? co.opDefaults[co.opFallbackYear];
+  return {
+    grade: co.base.grade,
+    salary: co.base.salary,
+    avgSalary: co.base.avgSalary,
+    headcount: co.base.headcount,
+    months: 12,
+    h1: co.base.h1,
+    h2: co.base.h2,
+    taxRate: null,
+    accumGrowth: 5,
+    accumYears: 5,   // 기본 5개년(사용자 2026-09-10)
+    accumSalaryOverrides: {},
+    workMonthsByYear: {},
+    ...Object.fromEntries(SEMCO_YEARS.map(year => [hynixOpKey(year), opAt(year)])),
+    opTril: opAt(SEMCO_YEARS[0]),
+  };
+}
 
-export const SEMCO_DEFAULTS: SemcoInputs = {
-  grade: 'cl4-low',
-  salary: 5600,
-  avgSalary: 7000,
-  headcount: 12000,
-  months: 12,
-  h1: 75,
-  h2: 75,
-  taxRate: null,
-  accumGrowth: 5,
-  accumYears: 5,   // 기본 5개년(사용자 2026-09-10)
-  accumSalaryOverrides: {},
-  workMonthsByYear: {},
-  ...Object.fromEntries(SEMCO_YEARS.map(year => [hynixOpKey(year), SEMCO_OP_DEFAULTS[year] ?? SEMCO_OP_DEFAULTS[2028]])),
-  opTril: SEMCO_OP_DEFAULTS[2026],
-};
+/** 연도별 영업이익 기본 가정(조) — 2026 1.64 … 장기 가정. 이름은 소비처가 물고 있어 그대로 둔다 */
+export const SEMCO_OP_DEFAULTS: Record<number, number> = { ...SEMCO.opDefaults };
+
+export const SEMCO_DEFAULTS: SemcoInputs = opiTaiDefaults(SEMCO);
+export const SDI_DEFAULTS: SemcoInputs = opiTaiDefaults(SDI);
 
 export {
   getActiveHynixYears as getActiveSemcoYears,
