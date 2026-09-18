@@ -2,16 +2,16 @@
   "_meta": {
     "version": "2026.07",
     "description": "계산기 영업이익·인원·연봉 가정값 스키마 — 기본값·범위·단위·설명 단일 소스",
-    "note": "이 파일이 수정되면 useCalcState.js, useHynixState.js, useAssumptions.js, dashboard/functions/api/assumptions.js도 자동 반영됩니다"
+    "note": "이 파일의 default가 계산 가정값의 단일 소스다(2026-09-18 CMS 격하). core/bonus/*/derive.ts가 직접 읽으므로 수정하면 useCalcState·useHynixState·프리렌더에 자동 반영된다. 값 변경은 커밋 메시지에 근거를 남긴다"
   },
   "samsung": {
-    "opMem2026": { "default": 350,   "min": -100, "max": 500, "unit": "조원", "desc": "메모리 2026년 영업이익 — CMS assumptions와 같은 값(2026-09-11 맞춤). 폴백이 CMS와 다르면 프리렌더 HTML과 런타임 화면이 다른 숫자를 보여준다(check-cms-assumptions)." },
+    "opMem2026": { "default": 350,   "min": -100, "max": 500, "unit": "조원", "desc": "메모리 2026년 영업이익(2026-09-11 갱신). 이 default가 유일한 소스다 — CMS는 2026-09-18 격하." },
     "opFnd2026": { "default": -1.5,  "min": -100, "max": 100, "unit": "조원", "desc": "파운드리 2026년 영업이익" },
     "opLsi2026": { "default": -0.5,  "min": -100, "max": 100, "unit": "조원", "desc": "S.LSI 2026년 영업이익" },
-    "opMem2027": { "default": 400,   "min": -100, "max": 500, "unit": "조원", "desc": "메모리 2027년 영업이익 — CMS assumptions와 같은 값(2026-09-09 맞춤). 폴백은 '그럴듯한 값'이 아니라 CMS와 같은 값이어야 한다: 다르면 CMS 미응답 순간 화면 숫자가 튄다." },
+    "opMem2027": { "default": 400,   "min": -100, "max": 500, "unit": "조원", "desc": "메모리 2027년 영업이익(2026-09-09 갱신)." },
     "opFnd2027": { "default": 3.5,   "min": -100, "max": 100, "unit": "조원", "desc": "파운드리 2027년 영업이익" },
     "opLsi2027": { "default": 1.5,   "min": -100, "max": 100, "unit": "조원", "desc": "S.LSI 2027년 영업이익" },
-    "opMem2028": { "default": 400,   "min": -100, "max": 500, "unit": "조원", "desc": "메모리 2028년 영업이익 — CMS assumptions와 같은 값(2026-09-09 맞춤)." },
+    "opMem2028": { "default": 400,   "min": -100, "max": 500, "unit": "조원", "desc": "메모리 2028년 영업이익(2026-09-09 갱신)." },
     "opFnd2028": { "default": 7,     "min": -100, "max": 100, "unit": "조원", "desc": "파운드리 2028년 영업이익" },
     "opLsi2028": { "default": 3,     "min": -100, "max": 100, "unit": "조원", "desc": "S.LSI 2028년 영업이익" },
     "opMem2029": { "default": 200,   "min": -100, "max": 500, "unit": "조원", "desc": "메모리 2029년 영업이익 (장기 참고 · 사용자 2026-09-10)" },
