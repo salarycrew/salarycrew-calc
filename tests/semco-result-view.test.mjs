@@ -156,22 +156,23 @@ test('세전: OPI + TAI = 합계 · 세전 > 세후 · 곡선과 히어로가 �
 
 // ── 삼성SDI — 같은 엔진, 다른 값 (2026-09-18) ────────────────────────────────
 // 여기서 재는 것은 계산이 아니라 **회사 스펙이 실제로 화면 값까지 닿는가**다.
-// semco 값이 그대로 새면(평균연봉 7,000만·TAI 75/75) 지급률이 통째로 달라지므로 골든으로 못 박는다.
+// semco 값이 그대로 새면(인원 12,000명·TAI 75/75·영업이익 1~3조) 지급률이 통째로 달라지므로 골든으로 못 박는다.
+// 평균연봉 7,000만은 두 회사가 **일부러 같다**(사용자 2026-09-18) — 복붙 회귀는 인원·영업이익으로 잡는다.
 
-test('삼성SDI 골든: 전사 영업이익 0.39조 · 평균 9,498만 · 12,826명 · TAI 75/0', () => {
+test('삼성SDI 골든: 전사 영업이익 0.39조 · 평균 7,000만 · 12,826명 · TAI 75/0', () => {
   const v = view(SDI_DEFAULTS);
   assert.equal(v.condition.opT, 0.39);
-  assert.equal(v.condition.avgSalary, 9498);      // DART 2025 귀속(data/companies.json)
+  assert.equal(v.condition.avgSalary, 7000);      // 삼성전기와 같은 기준(사용자 2026-09-18) — DART 9,498만이 아니다
   assert.equal(v.condition.headcount, 12826);
   assert.equal(v.condition.h1, 75);               // 2026 상반기 전 사업부 75% 확정
   assert.equal(v.condition.h2, 0);                // 하반기 미발표 — 없는 값을 채우지 않는다(§2)
   assert.equal(v.formula.pool.poolT.toFixed(3), '0.039');   // 0.39 × 10%
   assert.equal(v.formula.perHead.avgMan, 304);
-  assert.equal(v.formula.opi.capped, false);      // 지급률 3.2% — 상한 50%와 멀다
-  assert.equal(v.formula.opi.pre, 179);
+  assert.equal(v.formula.opi.capped, false);      // 지급률 4.3% — 상한 50%와 멀다
+  assert.equal(v.formula.opi.pre, 243);
   assert.equal(v.formula.tai.pre, 210);           // 280 × (75% + 0%)
-  assert.equal(v.hero.total, 328);
-  assert.equal(v.formula.deduct.net, 309);
+  assert.equal(v.hero.total, 382);
+  assert.equal(v.formula.deduct.net, 360);
 });
 
 test('삼성SDI: 2027년 이후는 컨센서스가 없어 2026E와 같은 값이다 — 회복 곡선을 지어내지 않는다', () => {
@@ -184,7 +185,7 @@ test('회사 스펙이 두 벌로 새지 않는다 — 기본값은 companies.ts
   assert.deepEqual(opiTaiDefaults(SEMCO), SEMCO_DEFAULTS);
   assert.deepEqual(opiTaiDefaults(SDI), SDI_DEFAULTS);
   // 두 회사가 같은 값을 쓰면 스펙을 나눈 의미가 없다(복붙 회귀 감지)
-  assert.notEqual(SDI_DEFAULTS.avgSalary, SEMCO_DEFAULTS.avgSalary);
+  assert.notEqual(SDI_DEFAULTS.headcount, SEMCO_DEFAULTS.headcount);   // 평균연봉은 일부러 같으므로 인원으로 잰다
   assert.notEqual(SDI_DEFAULTS.opTril, SEMCO_DEFAULTS.opTril);
   assert.equal(SDI.reportSlug, 'samsung-sdi');
   // 조건 바 눈금은 회사 영업이익 규모를 따라간다 — semco 눈금(1~3조)이 SDI에 새면 바가 못 쓰게 된다
