@@ -1,7 +1,7 @@
 // core/bonus/rate/derive.ts — '지급률 발표형' 성과급 계산 (LG전자·한화에어로·현대차·기아, 2026-08-08 → 2026-09-07 S5b core/bonus/rate/).
 //
-// 삼성 OPI처럼 산식(초과이익 %)이 아니라, 회사가 해마다 '기본급의 N%'를 사후 공지하거나 임단협으로 정하는 유형.
-// 계산은 월 기본급 × 지급률(+ 정액)이 전부라 컨센서스 모델 없이 최신 공지 지급률을 기본값으로 심는다.
+// 삼성 OPI처럼 산식(초과이익 %)이 아니라, 회사가 해마다 N%를 사후 공지하거나 임단협으로 정하는 유형.
+// 계산은 사용자 입력 기준금액 × 지급률(+ 정액)이라 컨센서스 모델 없이 최신 공지 지급률을 기본값으로 심는다.
 // 새해 공지가 나오면 divisions/ratePct만 갱신. 옛 경로 core/rate-bonus.js는 이 파일을 re-export하는 shim.
 //
 // 두 갈래가 있다.
@@ -75,12 +75,13 @@ export const RATE_COMPANIES: Record<string, RateCompany> = {
     asOf: '2026년 임금협상 타결(8/31 가결)',
     // https://www.newsis.com/view/NISX20260831_0003770400
     sourceNote: '2026-08-25 잠정합의안이 8/31 조합원 투표에서 가결된 기준',
+    basisUnverified: true,
     // 경영성과금 400% + 일시금 1,270만 — 둘 다 현금이라 세후 계산에 들어간다.
     ratePct: 400,
     fixedMan: 1270,
     fixedLabel: '일시금',
     breakdown: [
-      { label: '경영성과금', value: '월 기본급의 400%' },
+      { label: '경영성과금', value: '기준금액의 400%' },
       { label: '일시금', value: '1,270만원' },
     ],
     // 아래는 합의안에 있지만 세후 금액에 넣지 않은 것들. 뺀 이유까지 적어 둔다 —
@@ -104,14 +105,15 @@ export const RATE_COMPANIES: Record<string, RateCompany> = {
     asOf: '2026년 임단협 타결(8/28 가결)',
     // https://www.yna.co.kr/amp/view/AKR20260828138200061
     sourceNote: '2026-08-25 잠정합의안이 8/28 조합원 투표에서 가결된 기준',
+    basisUnverified: true,
     // 경영성과금 300% + 품질향상 격려금 100% = 400%,
     // 정액 400만 + 470만 + 오토카 어워즈 400만 = 1,270만. 현대차와 총액이 같다.
     ratePct: 400,
     fixedMan: 1270,
     fixedLabel: '격려금·일시금 합계',
     breakdown: [
-      { label: '경영성과금', value: '월 기본급의 300% + 400만원' },
-      { label: '품질향상 격려금', value: '월 기본급의 100% + 470만원' },
+      { label: '경영성과금', value: '기준금액의 300% + 400만원' },
+      { label: '품질향상 격려금', value: '기준금액의 100% + 470만원' },
       { label: '오토카 어워즈 수상기념 격려금', value: '400만원' },
     ],
     extras: [
@@ -164,14 +166,14 @@ export function resolveRate(co: RateCompany, inputs: RateInputs): number {
   return div ? div.rate : (co.ratePct ?? 0);
 }
 
-/** 세후 추정용 연봉(만원) — 직접 입력이 없으면 월 기본급 × 14 근사(상여·수당 포함). 근사라는 사실은 화면이 말한다 */
+/** 세금 추정용 연봉(만원) — 직접 입력이 없으면 사용자 입력 기준금액 × 14 근사. 근사라는 사실은 화면이 말한다 */
 export const ANNUAL_PAY_MULT = 14;
 export function resolveAnnualPay(inputs: RateInputs): number {
   if (inputs.annualPay != null && inputs.annualPay !== '') return Math.max(0, Number(inputs.annualPay) || 0);
   return Math.round((Number(inputs.baseMonthly) || 0) * ANNUAL_PAY_MULT);
 }
 
-// baseMonthly: 월 기본급(만) · ratePct: 지급률(%) · fixedMan: 전사 정액(만)
+// baseMonthly: 사용자가 입력한 산정 기준금액(만) · ratePct: 지급률(%) · fixedMan: 전사 정액(만)
 // annualPay: 성과급 제외 연봉(만) — 세후(한계세율) 추정용
 export function calcRateBonus({ baseMonthly, ratePct, fixedMan = 0, annualPay }:
   { baseMonthly: number | string; ratePct: number | string; fixedMan?: number; annualPay: number | string }): RateResult {

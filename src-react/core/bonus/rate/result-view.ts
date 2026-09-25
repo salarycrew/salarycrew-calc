@@ -1,4 +1,4 @@
-// core/bonus/rate/result-view.ts — 지급률형 4사 결과 화면의 뷰 모델. 항등식: 세후 = 세전 − 소득세 · 세전 = 월 기본급 × 지급률 + 정액.
+// core/bonus/rate/result-view.ts — 지급률형 4사 결과 화면의 뷰 모델. 항등식: 추정 차감 후 = 세전 − 추정 소득세 · 세전 = 입력 기준금액 × 지급률 + 정액.
 // 경계(CLAUDE.md §10): derive가 낸 값의 재배열뿐 — 세율·근사 배수는 derive의 것이다.
 import { calcRateResult, pickDivision, resolveAnnualPay, resolveFixed, resolveRate, ANNUAL_PAY_MULT } from './derive.ts';
 import type { RateCompany, RateInputs, RateResult } from './types.ts';
