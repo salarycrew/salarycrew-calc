@@ -8,9 +8,8 @@
 //   사업부 공지형(LG·한화) — divisions[]가 있고 사업부를 고르면 지급률이 따라온다.
 //   임단협형(현대차·기아)  — 전 조합원 동일 조건이라 divisions가 없고 ratePct 하나다.
 //
-// 임단협형은 **가결 전 값을 다루게 된다**는 점이 다르다. 잠정합의 ≠ 타결이고 부결 사례가 실제로 있는 사안이라
-// (docs/sessions/2026-08-19-hynix-wage-deal-plan.md §4-A), 확정된 숫자처럼 보이면 안 된다. pending이 있으면
-// 화면 맨 위에 투표일과 함께 미확정 배너가 뜨고, 가결되면 pending을 지우고 asOf를 '타결'로 바꾼다.
+// 임단협형은 가결 전 잠정합의를 다룰 수 있다. 그때만 pending을 두고 미확정 배너를 띄운다.
+// 가결 후에는 pending을 지우고 asOf·출처·이력을 함께 갱신한다.
 import { bonusTaxDeducted } from '../../calc-bridge.js';
 import type { RateCompany, RateDivision, RateInputs, RateResult } from './types.ts';
 
@@ -73,13 +72,9 @@ export const RATE_COMPANIES: Record<string, RateCompany> = {
     key: 'hyundai',
     name: '현대자동차',
     payName: '성과급',
-    asOf: '2026년 임단협 잠정합의(8/25)',
-    sourceNote: '2026-08-25 잠정합의안 언론 보도 종합 · 조합원 찬반투표 전이라 확정값이 아닙니다',
-    pending: {
-      status: 'tentative',
-      vote: '8월 31일 조합원 찬반투표',
-      text: '8/25 잠정합의안 기준입니다. 가결돼야 확정되고, 부결되면 재교섭으로 금액이 달라집니다.',
-    },
+    asOf: '2026년 임금협상 타결(8/31 가결)',
+    // https://www.newsis.com/view/NISX20260831_0003770400
+    sourceNote: '2026-08-25 잠정합의안이 8/31 조합원 투표에서 가결된 기준',
     // 경영성과금 400% + 일시금 1,270만 — 둘 다 현금이라 세후 계산에 들어간다.
     ratePct: 400,
     fixedMan: 1270,
@@ -98,7 +93,7 @@ export const RATE_COMPANIES: Record<string, RateCompany> = {
     ],
     defaults: { baseMonthly: 300 },
     history: [
-      { period: '2026년 임단협 (잠정합의 · 투표 전)', top: '400% + 1,270만', note: '주식 15주 · 복지포인트 50만 · 기본급 10만 인상' },
+      { period: '2026년 임금협상 (8/31 가결)', top: '400% + 1,270만', note: '주식 15주 · 복지포인트 50만 · 기본급 10만 인상' },
       { period: '2025년 임단협 (2025-09 타결)', top: '450% + 1,580만', note: '기본급 10만 인상 · 자사주 30주' },
     ],
   },
@@ -106,13 +101,9 @@ export const RATE_COMPANIES: Record<string, RateCompany> = {
     key: 'kia',
     name: '기아',
     payName: '성과급',
-    asOf: '2026년 임단협 잠정합의(8/25)',
-    sourceNote: '2026-08-25 잠정합의안 언론 보도 종합 · 조합원 찬반투표 전이라 확정값이 아닙니다',
-    pending: {
-      status: 'tentative',
-      vote: '8월 28일 조합원 찬반투표(부재자 8/27)',
-      text: '8/25 잠정합의안 기준입니다. 가결돼야 확정되고, 부결되면 재교섭으로 금액이 달라집니다.',
-    },
+    asOf: '2026년 임단협 타결(8/28 가결)',
+    // https://www.yna.co.kr/amp/view/AKR20260828138200061
+    sourceNote: '2026-08-25 잠정합의안이 8/28 조합원 투표에서 가결된 기준',
     // 경영성과금 300% + 품질향상 격려금 100% = 400%,
     // 정액 400만 + 470만 + 오토카 어워즈 400만 = 1,270만. 현대차와 총액이 같다.
     ratePct: 400,
@@ -130,7 +121,7 @@ export const RATE_COMPANIES: Record<string, RateCompany> = {
     ],
     defaults: { baseMonthly: 300 },
     history: [
-      { period: '2026년 임단협 (잠정합의 · 투표 전)', top: '400% + 1,270만', note: '자사주 47주 · 특별포인트 50만 · 가결 시 6년 연속 무분규' },
+      { period: '2026년 임단협 (8/28 가결)', top: '400% + 1,270만', note: '자사주 47주 · 특별포인트 50만 · 6년 연속 무분규' },
       { period: '2025년 임단협 (2025-09 타결)', top: '450% + 1,600만', note: '5년 연속 무분규 타결' },
     ],
   },

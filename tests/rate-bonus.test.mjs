@@ -28,6 +28,12 @@ for (const [key, co] of Object.entries(RATE_COMPANIES)) {
   }
 }
 
+// 2026년 투표가 끝난 두 회사는 계산 화면에 미확정 배너가 없어야 한다.
+for (const key of ['hyundai', 'kia']) {
+  const co = RATE_COMPANIES[key];
+  assert.ok(!co.pending && /타결/.test(co.asOf), `${key}: 계산 화면은 타결 상태`);
+}
+
 // 1-b) 확정 전 값을 쓰는 회사는 그 사실이 데이터에 남아 있어야 한다.
 //      잠정합의 ≠ 타결이고 부결되면 금액이 달라진다 — 배너가 안 뜨면 확정처럼 읽힌다.
 //      가결되면 pending을 지우고 asOf를 '타결'로 바꾸는데, 그때 이 테스트가 짝을 맞춰 준다.
